@@ -1,58 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
-const listItems = [];
+class TodoList extends Component {
 
-function Todolist() {
-
-    const [valueChange, setValueChange] = useState('');
-
-    const handleChange = (event) => {
-        setValueChange(event.target.value);
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: '',
+      items: []
     }
+  }
 
-    const onClick = (event) => {
-      if (valueChange.length > 0) {
-        listItems.push({name: valueChange, key: Math.random()});
-        setValueChange('');
-      }
-      event.preventDefault();
+  handleChange = (event) => {
+    this.setState({
+      title: event.target.value
+    })
+  }
+
+  onClick = event => {
+    if (this.state.title.length > 0) {
+      this.state.items.push({
+        title: this.state.title,
+        id: this.state.items.lentgth + 1
+      });
+      this.setState({
+        title: ''
+      })
     }
+    event.preventDefault();
+  }
 
-    useEffect(() => {
-        document.title = listItems.length > 0 ? `${listItems.length} Todos` : `TodoList`;
-
-        console.log(listItems)
-
-        fetch("https://jsonplaceholder.typicode.com/todos/", {
-          method: 'GET',
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          }
+  componentDidMount() {
+    fetch("https://jsonplaceholder.typicode.com/todos/", {
+        method: 'GET',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+      })
+      .then(response => response.json())
+      .then(result => {
+        this.setState({
+          items: result
         })
-          .then(response => response.json())
-          .then(result => listItems.push(result))
-    });
+      })
 
+    document.title = `${this.state.items.length} todos`
+  }
 
-    return (
-        <div>
+  componentDidUpdate() {
+    document.title = `${this.state.items.length} todos`
+  }
+
+  render() {
+    return(
+      <div>
         <h1>Todo list</h1>
         <form>
           <input
-            onChange={handleChange}
+            onChange={this.handleChange}
             type="text"
-            value={valueChange}
+            value={this.state.title}
             name="valueChange"
             placeholder="Add something"
           />
-        <button onClick={onClick.bind(this)}>Ajouter</button>
+        <button onClick={this.onClick.bind(this)}>Ajouter</button>
         </form>
         <div id="listContainer">
           <ul>
             {
-                listItems.map(listItem => (
-                    <li key={listItem.key}>
-                        {listItem.name}
+                this.state.items.map(item => (
+                    <li key={item.id}>
+                        {item.title}
                     </li>
                 ))
             }
@@ -60,6 +77,7 @@ function Todolist() {
         </div>
       </div>
     )
+  }
 }
 
-export default Todolist;
+export default TodoList;
