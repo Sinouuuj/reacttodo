@@ -48,6 +48,13 @@ class TodoList extends Component {
     event.preventDefault();
   }
 
+  delete = event => {
+    fetch("http://localhost:3000/todos/"+this.item.id, {
+      method: "DELETE"
+    })
+    event.preventDefault();
+  }
+
   componentDidMount() {
     fetch("http://localhost:3000/todos", {
         method: 'GET',
@@ -72,23 +79,41 @@ class TodoList extends Component {
   render() {
     return(
       <div>
-        <h1>Todo list</h1>
-        <form>
-          <input
-            onChange={this.handleChange}
-            type="text"
-            value={this.state.title}
-            name="valueChange"
-            placeholder="Add something"
-          />
-        <button onClick={this.onClick.bind(this)}>Ajouter</button>
-        </form>
+        <h1>Todolist</h1>
+        <div className="row">
+          <div className="col s4 offset-s4">
+            <form>
+              <input
+                onChange={this.handleChange}
+                type="text"
+                value={this.state.title}
+                name="valueChange"
+                placeholder="Add something"
+              />
+              <button onClick={this.onClick.bind(this)}>Ajouter</button>
+            </form>
+          </div>
+        </div>
+        
         <div id="listContainer">
-          <ul>
+          <ul className="row">
             {
                 this.state.items.map(item => (
-                    <li key={item.id}>
-                        {item.title}
+                    <li 
+                      className="col s4" 
+                      key={item.id}
+                      id={item.id}
+                    >
+                        <div class="card blue-grey darken-1">
+                          <div class="card-content white-text">
+                            <span class="card-title">{item.title}</span>
+                            <div>Task for : {item.userId}</div>
+                          </div>
+                          <div class="card-action">
+                            <a href="#">Edit</a>
+                            <a href="#" onClick={this.delete.bind(this)}>Delete</a>
+                          </div>
+                        </div>
                     </li>
                 ))
             }
