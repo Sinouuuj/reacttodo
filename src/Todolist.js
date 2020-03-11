@@ -20,8 +20,27 @@ class TodoList extends Component {
     if (this.state.title.length > 0) {
       this.state.items.push({
         title: this.state.title,
-        id: this.state.items.lentgth + 1
+        id: this.state.items.length + 1
       });
+
+      fetch("http://localhost:3000/todos", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: this.state.title,
+          id: this.state.items.length + 1,
+          userId: 11,
+          completed: false
+        })
+      })
+        .then(response => response.json())
+        // .then(result => {
+        //   console.log(result);
+        // })
+
       this.setState({
         title: ''
       })
@@ -30,7 +49,7 @@ class TodoList extends Component {
   }
 
   componentDidMount() {
-    fetch("https://jsonplaceholder.typicode.com/todos/", {
+    fetch("http://localhost:3000/todos", {
         method: 'GET',
         headers: {
           "Content-type": "application/json; charset=UTF-8"
