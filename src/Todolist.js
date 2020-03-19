@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
-class TodoList extends Component {
+class TodoList extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -17,12 +17,9 @@ class TodoList extends Component {
   }
 
   onClick = event => {
-    if (this.state.title.length > 0) {
-      this.state.items.push({
-        title: this.state.title,
-        id: this.state.items.length + 1
-      });
-
+    const { title, items } = this.state;
+    
+    if (title) {
       fetch("http://localhost:3000/todos", {
         method: 'POST',
         headers: {
@@ -30,35 +27,46 @@ class TodoList extends Component {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: this.state.title,
-          id: this.state.items.length + 1,
+          title: title,
+          id: Math.random(),
           userId: 11,
           completed: false
         })
       })
         .then(response => response.json())
-        // .then(result => {
-        //   console.log(result);
-        // })
 
+      const nextState = [...items, {title: title, userId: null, completed: false, id: Math.random()}];
       this.setState({
+        items: nextState,
         title: ''
-      })
+      });
     }
     event.preventDefault();
   }
 
-  delete = event => {
-    fetch("http://localhost:3000/todos/"+this.item.id, {
+  delete = (deleteId) => {
+
+    const { items } = this.state;
+
+    fetch("http://localhost:3000/todos/"+deleteId, {
       method: "DELETE"
-    })
-    event.preventDefault();
+    });
+    let filteredItems = items.filter(item => {
+      return item.id != deleteId
+    });
+    this.setState({items: filteredItems})
+    // console.log(filteredItems)
+    // event.preventDefault();
   }
 
   componentDidMount() {
+    
+    const {items} = this.state;
+    
     fetch("http://localhost:3000/todos", {
         method: 'GET',
         headers: {
+          'Accept': 'application/json',
           "Content-type": "application/json; charset=UTF-8"
         }
       })
@@ -67,14 +75,38 @@ class TodoList extends Component {
         this.setState({
           items: result
         })
+        // console.log(items, 'Component did mount')
       })
 
     document.title = `${this.state.items.length} todos`
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.items.length !== prevState.items.length) {
+      fetch("http://localhost:3000/todos", {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+        .then(response => response.json())
+        .then(result => {
+          this.setState({
+            items: result
+          })
+        })
+      // console.log(this.state.items, 'this state items')
+      // console.log(prevState.items, 'prevState items')
+    }
+    
+
     document.title = `${this.state.items.length} todos`
   }
+
+  // shouldComponentUpdate() {
+    
+  // }
 
   render() {
     return(
@@ -98,20 +130,19 @@ class TodoList extends Component {
         <div id="listContainer">
           <ul className="row">
             {
-                this.state.items.map(item => (
+                this.state.items.map((item, i) => (
                     <li 
                       className="col s4" 
-                      key={item.id}
-                      id={item.id}
+                      key={i}
                     >
-                        <div class="card blue-grey darken-1">
-                          <div class="card-content white-text">
-                            <span class="card-title">{item.title}</span>
+                        <div className="card blue-grey darken-1">
+                          <div className="card-content white-text">
+                            <span className="card-title">{item.title}</span>
                             <div>Task for : {item.userId}</div>
                           </div>
-                          <div class="card-action">
-                            <a href="#">Edit</a>
-                            <a href="#" onClick={this.delete.bind(this)}>Delete</a>
+                          <div className="card-action">
+                            <div>Edit</div>
+                            <div onClick={() => this.delete(item.id)}>Delete</div>
                           </div>
                         </div>
                     </li>
