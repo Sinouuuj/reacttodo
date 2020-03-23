@@ -12,6 +12,7 @@
     "react-scripts": "3.4.0"
   },
   "scripts": {
+    "server": "json-server db.json --watch --fks dummy",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
